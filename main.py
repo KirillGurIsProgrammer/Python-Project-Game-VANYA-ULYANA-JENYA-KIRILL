@@ -1,7 +1,7 @@
 from Character import Nerd
 from Gun import Gun
 import pygame
-
+p = 43
 pygame.init()
 screen = pygame.display.set_mode((1024, 700))
 pygame.display.set_caption("Running throw the fog DVFU EDITION")

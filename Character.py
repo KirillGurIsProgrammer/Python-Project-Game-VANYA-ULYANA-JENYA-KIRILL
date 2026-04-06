@@ -1,5 +1,6 @@
 import pygame
 class Character:
+    p = 43
     def __init__(self, name, image, speed):
         self.name = name
         self.x = 500
