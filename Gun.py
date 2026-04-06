@@ -1,6 +1,5 @@
 import pygame
 class Gun:
-    p = 43
     def __init__(self, x, y, screen):
         self.screen = screen
         self.bullet = pygame.Surface((7, 7))
