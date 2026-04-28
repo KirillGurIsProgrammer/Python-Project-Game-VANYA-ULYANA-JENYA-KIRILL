@@ -1,37 +1,58 @@
 from Character import Nerd
 from Gun import Gun
+from worldGeneration import WorldGeneration
 import pygame
+
 pygame.init()
-screen = pygame.display.set_mode((1024, 700))
+clock = pygame.time.Clock()
+
+WIDTH, HEIGHT = 1024, 800
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
 pygame.display.set_caption("Running throw the fog DVFU EDITION")
-icon = pygame.image.load('golden-gate.png')
-backGround = pygame.image.load('ChatGPT Image 1 марта 2026 г., 23_28_25.png')
+
+icon = pygame.image.load('images/golden-gate.png')
 
 pygame.display.set_icon(icon)
+
 run = True
 
-hero = Nerd()
-gun = Gun(hero.showTheMovementX(), hero.showTheMovementY(), screen)
+hero = Nerd(screen)
+
+gun = Gun(hero.x, hero.y, screen)
+
+worldGeneration = WorldGeneration(0, 0)
+worldGeneration.generation()
 
 while run:
-    screen.blit(backGround, (0, 0))
-    screen.blit(hero.showTheImage(), (hero.showTheMovementX(), hero.showTheMovementY()))
-
-    hero.movement()
-
-
-    if gun.showTheStatus():
-        gun.bulletMove()
-        if gun.x > 1024:
-            gun.bulletStatus = False
-
-    pygame.display.update()
+    clock.tick(60)
 
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             run = False
+
         if e.type == pygame.MOUSEBUTTONDOWN:
             if e.button == 1:
-                gun.startBulletMovement(hero.showTheMovementX(), hero.showTheMovementY())
+                gun.startBulletMovement(hero.x, hero.y)
+
+    hero.movement()
+
+    camera_x = hero.x - WIDTH // 2
+    camera_y = hero.y - HEIGHT // 2
+
+    worldGeneration.cameraX = camera_x
+    worldGeneration.cameraY = camera_y
+
+    screen.fill((0, 0, 0))
+
+    worldGeneration.drawing(screen)
+
+    hero.draw(camera_x, camera_y)
+
+    if gun.showTheStatus():
+        gun.bulletMove()
+
+
+    pygame.display.update()
 
 pygame.quit()
