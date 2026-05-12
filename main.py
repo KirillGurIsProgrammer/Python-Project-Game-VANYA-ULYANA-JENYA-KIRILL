@@ -19,14 +19,13 @@ run = True
 
 hero = Nerd(screen)
 
-gun = Gun(hero.x, hero.y, screen)
+gun = Gun(screen, 0, 0)
 
 worldGeneration = WorldGeneration(0, 0)
 worldGeneration.generation()
 
 while run:
     clock.tick(60)
-
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             run = False
@@ -43,16 +42,16 @@ while run:
     worldGeneration.cameraX = camera_x
     worldGeneration.cameraY = camera_y
 
+    gun.camerax = camera_x
+    gun.cameray = camera_y
+
     screen.fill((0, 0, 0))
 
     worldGeneration.drawing(screen)
 
     hero.draw(camera_x, camera_y)
 
-    if gun.showTheStatus():
-        gun.bulletMove()
-
-
+    gun.bulletMove()
     pygame.display.update()
 
 pygame.quit()
