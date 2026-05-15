@@ -2,6 +2,7 @@ from Character import Nerd
 from Gun import Gun
 from worldGeneration import WorldGeneration
 import pygame
+from Enemy import Zombie
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -20,10 +21,9 @@ run = True
 hero = Nerd(screen)
 
 gun = Gun(screen, 0, 0)
-
+zombie = Zombie(screen)
 worldGeneration = WorldGeneration(0, 0)
 worldGeneration.generation()
-
 while run:
     clock.tick(60)
     for e in pygame.event.get():
@@ -35,7 +35,6 @@ while run:
                 gun.startBulletMovement(hero.x, hero.y)
 
     hero.movement()
-
     camera_x = hero.x - WIDTH // 2
     camera_y = hero.y - HEIGHT // 2
 
@@ -50,6 +49,7 @@ while run:
     worldGeneration.drawing(screen)
 
     hero.draw(camera_x, camera_y)
+    zombie.drawing(camera_x, camera_y, hero.x, hero.y)
 
     gun.bulletMove()
     pygame.display.update()
