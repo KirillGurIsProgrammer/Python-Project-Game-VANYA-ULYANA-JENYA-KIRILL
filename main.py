@@ -35,6 +35,7 @@ while run:
                 gun.startBulletMovement(hero.x, hero.y)
 
     hero.movement()
+    zombie.position(hero.x, hero.y)
     camera_x = hero.x - WIDTH // 2
     camera_y = hero.y - HEIGHT // 2
 
