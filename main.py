@@ -36,6 +36,7 @@ while run:
 
     hero.movement()
     zombie.position(hero.x, hero.y)
+    zombie.check_collision(hero.rect)
     camera_x = hero.x - WIDTH // 2
     camera_y = hero.y - HEIGHT // 2
 

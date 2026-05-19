@@ -2,7 +2,8 @@ import pygame
 from animations import Animations
 
 class Character:
-    def __init__(self, screen):
+    def __init__(self, screen, hp):
+        self.hp = hp
         self.screen = screen
         self.x = 500
         self.y = 200
@@ -10,6 +11,7 @@ class Character:
 
         self.animations = Animations()
         self.image = self.animations.get_idle()
+        self.rect = self.image.get_rect(topleft=(self.x, self.y)).inflate(-20, -10)
 
     def movement(self):
         keys = pygame.key.get_pressed()
@@ -33,13 +35,18 @@ class Character:
         else:
             self.image = self.animations.get_idle()
 
+        self.rect.topleft = (self.x + 10, self.y + 5)
+
+
     def draw(self, camera_x, camera_y):
         self.screen.blit(
             self.image,
             (self.x - camera_x, self.y - camera_y)
         )
+        pygame.draw.rect(self.screen, (0, 255, 0), self.rect.move(-camera_x, -camera_y), 2)
+
 
 
 class Nerd(Character):
     def __init__(self, screen):
-        super().__init__(screen)
+        super().__init__(screen, 100)
