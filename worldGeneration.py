@@ -10,18 +10,18 @@ class WorldGeneration:
     TILE_SIZE = 50
 
     def __init__(self, cameraX=0, cameraY=0):
-        self.cameraX  = cameraX
-        self.cameraY  = cameraY
-        self.map_w    = 80
-        self.map_h    = 80
+        self.cameraX = cameraX
+        self.cameraY = cameraY
+        self.map_w = 80
+        self.map_h = 80
         self.tile_map = []
-        self.rooms    = []
-        self.spawn    = (0, 0)
+        self.rooms = []
+        self.spawn = (0, 0)
 
-        self.floor = pygame.image.load("/Users/kirillgurev/PycharmProjects/ProjectFefuBridge/images/ah604tyj1y951.jpg")
+        self.floor = pygame.image.load("images/ah604tyj1y951.jpg")
         self.floor = pygame.transform.scale(self.floor, (self.TILE_SIZE, self.TILE_SIZE))
 
-        self.grass = pygame.image.load("/Users/kirillgurev/PycharmProjects/ProjectFefuBridge/images/png-klev-club-adfx-p-pikselnaya-trava-png-4.png")
+        self.grass = pygame.image.load("images/png-klev-club-adfx-p-pikselnaya-trava-png-4.png")
         self.grass = pygame.transform.scale(self.grass, (self.TILE_SIZE, self.TILE_SIZE))
 
         self.generation()
@@ -114,14 +114,14 @@ class WorldGeneration:
 
         start_x = max(0, self.cameraX // ts - 1)
         start_y = max(0, self.cameraY // ts - 1)
-        end_x   = min(self.map_w, start_x + sw // ts + 3)
-        end_y   = min(self.map_h, start_y + sh // ts + 3)
+        end_x = min(self.map_w, start_x + sw // ts + 3)
+        end_y = min(self.map_h, start_y + sh // ts + 3)
 
         for ty in range(start_y, end_y):
             for tx in range(start_x, end_x):
                 tile = self.tile_map[ty][tx]
-                px   = tx * ts - self.cameraX
-                py   = ty * ts - self.cameraY
+                px = tx * ts - self.cameraX
+                py = ty * ts - self.cameraY
 
                 if tile == TILE_FLOOR:
                     screen.blit(self.floor, (px, py))
@@ -131,10 +131,10 @@ class WorldGeneration:
                 else:
                     screen.blit(self.grass, (px, py))
 
-        left_gap  = start_x * ts - self.cameraX
-        top_gap   = start_y * ts - self.cameraY
+        left_gap = start_x * ts - self.cameraX
+        top_gap = start_y * ts - self.cameraY
         right_gap = end_x * ts - self.cameraX
-        bot_gap   = end_y * ts - self.cameraY
+        bot_gap = end_y * ts - self.cameraY
 
         if left_gap > 0:
             screen.fill((0, 0, 0), (0, 0, left_gap, sh))

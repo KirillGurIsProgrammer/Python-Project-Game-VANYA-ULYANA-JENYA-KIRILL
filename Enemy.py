@@ -4,7 +4,7 @@ import math
 
 class Enemy:
     def __init__(self, screen, hp, attack, speed):
-        self.image = pygame.image.load("/Users/kirillgurev/PycharmProjects/ProjectFefuBridge/images/tumblr_mjpz8fWmWp1r413h3o1_400.jpg")
+        self.image = pygame.image.load("images/tumblr_mjpz8fWmWp1r413h3o1_400.jpg")
         self.screen = screen
         self.hp = hp
         self.attack = attack

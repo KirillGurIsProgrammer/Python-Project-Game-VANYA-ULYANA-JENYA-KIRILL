@@ -18,9 +18,9 @@ class Character:
         ih = self.image.get_height()
         self.hb_ox = 10
         self.hb_oy = 5
-        self.hb_w  = iw - 20
-        self.hb_h  = ih - 10
-        self.rect  = pygame.Rect(int(self.x) + self.hb_ox, int(self.y) + self.hb_oy, self.hb_w, self.hb_h)
+        self.hb_w = iw - 20
+        self.hb_h = ih - 10
+        self.rect = pygame.Rect(int(self.x) + self.hb_ox, int(self.y) + self.hb_oy, self.hb_w, self.hb_h)
 
     def _can_move(self, nx, ny):
         if self.world is None:
