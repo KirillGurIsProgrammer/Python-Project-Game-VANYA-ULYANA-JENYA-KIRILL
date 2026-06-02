@@ -12,6 +12,7 @@ class Enemy:
         self.y = 200.0
         self.speed = speed
         self.world = None
+        self.is_dead = False
 
         iw = self.image.get_width()
         ih = self.image.get_height()
@@ -20,6 +21,7 @@ class Enemy:
         self.hb_w  = iw - 20
         self.hb_h  = ih - 10
         self.hitbox = pygame.Rect(int(self.x) + self.hb_ox, int(self.y) + self.hb_oy, self.hb_w, self.hb_h)
+        
 
     def _can_move(self, nx, ny):
         if self.world is None:
@@ -50,6 +52,30 @@ class Enemy:
 
         self.hitbox.topleft = (int(self.x) + self.hb_ox, int(self.y) + self.hb_oy)
 
+    def take_damage(self, amount):
+        self.hp -= amount
+        if self.hp <= 0:
+            self.is_dead = True
+
+    def draw_health_bar(self, camera_x, camera_y):
+        if self.is_dead:
+            return
+        bar_width = 40
+        bar_height = 6
+        bar_x = self.x - camera_x - bar_width // 2 + self.hb_w // 2
+        bar_y = self.y - camera_y - 12
+    
+        # Процент здоровья
+        health_percent = self.hp / 50.0  # 50 - максимальное HP зомби
+        current_width = bar_width * health_percent
+
+        # Красный фон
+        pygame.draw.rect(self.screen, (255, 0, 0), (bar_x, bar_y, bar_width, bar_height))
+        # Зелёное здоровье
+        pygame.draw.rect(self.screen, (0, 255, 0), (bar_x, bar_y, current_width, bar_height))
+        # Рамка
+        pygame.draw.rect(self.screen, (255, 255, 255), (bar_x, bar_y, bar_width, bar_height), 1)        
+
 
 class Zombie(Enemy):
     def __init__(self, screen):
@@ -58,6 +84,8 @@ class Zombie(Enemy):
     def drawing(self, camera_x, camera_y, xCharacter, yCharacter):
         self.screen.blit(self.image, (self.x - camera_x, self.y - camera_y))
         pygame.draw.rect(self.screen, (255, 0, 0), self.hitbox.move(-camera_x, -camera_y), 2)
+        
+        self.draw_health_bar(camera_x, camera_y)
 
     def check_collision(self, player_rect, player):
         if not self.hitbox.colliderect(player_rect):

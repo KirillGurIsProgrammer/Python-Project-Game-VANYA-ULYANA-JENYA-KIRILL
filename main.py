@@ -23,10 +23,19 @@ hero.x = float(spawn_x)
 hero.y = float(spawn_y)
 
 gun    = Gun(screen, 0, 0)
-zombie = Zombie(screen)
+zombies = [Zombie(screen)]   # список зомби
+
+for zombie in zombies:
+    zombie.world = worldGeneration
+    zombie.x = float(spawn_x) + 200.0
+    zombie.y = float(spawn_y)
+
+gun.set_zombies(zombies)   # передаём список в пушку
 zombie.world = worldGeneration
 zombie.x = float(spawn_x) + 200.0
 zombie.y = float(spawn_y)
+
+
 
 run = True
 while run:
@@ -39,8 +48,10 @@ while run:
             gun.startBulletMovement(hero.x, hero.y)
 
     hero.movement()
-    zombie.position(hero.x, hero.y)
-    zombie.check_collision(hero.rect, hero)
+    for zombie in zombies:
+        zombie.position(hero.x, hero.y)
+        if not zombie.is_dead:
+            zombie.check_collision(hero.rect, hero)
 
     camera_x = int(hero.x) - WIDTH  // 2
     camera_y = int(hero.y) - HEIGHT // 2
@@ -52,9 +63,15 @@ while run:
 
     worldGeneration.drawing(screen)
     hero.draw(camera_x, camera_y)
-    zombie.drawing(camera_x, camera_y, hero.x, hero.y)
+    for zombie in zombies:
+        if not zombie.is_dead:
+            zombie.drawing(camera_x, camera_y, hero.x, hero.y)
     gun.bulletMove()
 
+
+    zombies = [z for z in zombies if not z.is_dead]
+    gun.set_zombies(zombies)
     pygame.display.update()
+
 
 pygame.quit()

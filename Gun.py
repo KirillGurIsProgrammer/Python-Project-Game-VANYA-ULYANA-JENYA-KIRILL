@@ -11,6 +11,10 @@ class Gun:
         self.cameray = cameray
 
         self.bullets = []
+        self.zombies = None
+
+    def set_zombies(self, zombies_list):
+        self.zombies = zombies_list
 
     def startBulletMovement(self, playerX, playerY):
 
@@ -48,6 +52,14 @@ class Gun:
             bullet["x"] += bullet["dx"] * speed
             bullet["y"] += bullet["dy"] * speed
 
+            if self.zombies is not None:
+                bullet_rect = pygame.Rect(bullet["x"], bullet["y"], 7, 7)
+                for zombie in self.zombies[:]:
+                    if not zombie.is_dead and zombie.hitbox.colliderect(bullet_rect):
+                        zombie.take_damage(1)   # урон 1
+                        self.bullets.remove(bullet)
+                        break
+
             self.screen.blit(
                 self.bullet,
                 (
@@ -63,3 +75,7 @@ class Gun:
                 or bullet["y"] > 10000
             ):
                 self.bullets.remove(bullet)
+
+            
+
+        
