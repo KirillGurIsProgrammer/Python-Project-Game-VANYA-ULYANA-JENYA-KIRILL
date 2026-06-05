@@ -22,7 +22,7 @@ spawn_x, spawn_y = worldGeneration.get_spawn()
 hero.x = float(spawn_x)
 hero.y = float(spawn_y)
 
-gun    = Gun(screen, 0, 0)
+gun = Gun(screen, 0, 0)
 zombie = Zombie(screen)
 zombie.world = worldGeneration
 zombie.x = float(spawn_x) + 200.0
