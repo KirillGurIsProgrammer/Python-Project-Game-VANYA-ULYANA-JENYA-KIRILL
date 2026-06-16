@@ -6,9 +6,7 @@ from Enemy import Zombie
 from Gun import Gun
 from worldGeneration import WorldGeneration
 
-# ------------------------------------------------------------------ #
 #  Инициализация                                                       #
-# ------------------------------------------------------------------ #
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -18,9 +16,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Running through the fog — DVFU EDITION")
 pygame.display.set_icon(pygame.image.load("images/golden-gate.png"))
 
-# ------------------------------------------------------------------ #
 #  Вспомогательные функции                                            #
-# ------------------------------------------------------------------ #
 
 def spawn_zombies(world: WorldGeneration, screen: pygame.Surface,
                   spawn_x: float, spawn_y: float,
@@ -47,9 +43,7 @@ def world_to_screen(wx: float, wy: float, cam_x: int, cam_y: int) -> tuple:
     return wx - cam_x, wy - cam_y
 
 
-# ------------------------------------------------------------------ #
 #  Создание мира и персонажа                                          #
-# ------------------------------------------------------------------ #
 
 world = WorldGeneration()
 
@@ -63,7 +57,6 @@ projectiles: list = []
 
 zombies = spawn_zombies(world, screen, spawn_x, spawn_y)
 
-#  Игровой цикл                                                       #
 
 run = True
 while run:
@@ -114,7 +107,6 @@ while run:
     # Чистим мёртвые снаряды
     projectiles = [p for p in projectiles if p.alive]
 
-    # Двери — центр и полуразмер хитбокса чтобы точно знать когда игрок полностью внутри
     world.update_doors(
         hero.x + hero.hb_ox + hero.hb_w / 2,
         hero.y + hero.hb_oy + hero.hb_h / 2,
