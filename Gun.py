@@ -1,65 +1,69 @@
 import pygame
+import math
+from abc import ABC, abstractmethod
 
-class Gun:
-    def __init__(self, screen, camerax, cameray):
-        self.screen = screen
 
-        self.bullet = pygame.Surface((7, 7))
-        self.bullet.fill((255, 255, 0))
+class Projectile:
+    """Один снаряд."""
 
-        self.camerax = camerax
-        self.cameray = cameray
+    SIZE = 7
 
-        self.bullets = []
+    def __init__(self, x: float, y: float, dx: float, dy: float,
+                 damage: int, speed: float = 15.0, max_range: float = 1500.0):
+        self.x, self.y = x, y
+        self.dx, self.dy = dx, dy
+        self.damage = damage
+        self.speed = speed
+        self.max_range = max_range
+        self.traveled = 0.0
+        self.alive = True
+        self.rect = pygame.Rect(int(x), int(y), self.SIZE, self.SIZE)
 
-    def startBulletMovement(self, playerX, playerY):
+    def update(self, world=None):
+        self.x += self.dx * self.speed
+        self.y += self.dy * self.speed
+        self.traveled += self.speed
+        self.rect.topleft = (int(self.x) - self.SIZE // 2, int(self.y) - self.SIZE // 2)
+        if (world and world.is_wall(self.x, self.y)) or self.traveled >= self.max_range:
+            self.alive = False
 
-        mouse_x, mouse_y = pygame.mouse.get_pos()
+    def draw(self, screen: pygame.Surface, camera_x: int, camera_y: int):
+        pygame.draw.circle(
+            screen, (255, 220, 0),
+            (int(self.x - camera_x), int(self.y - camera_y)),
+            self.SIZE // 2,
+        )
 
-        mouse_world_x = mouse_x + self.camerax
-        mouse_world_y = mouse_y + self.cameray
 
-        bullet_x = playerX + 50
-        bullet_y = playerY + 25
+class Weapon(ABC):
+    def __init__(self, damage: int, fire_rate: float):
+        self.damage = damage
+        self.fire_rate = fire_rate
+        self._cooldown = 0.0
 
-        dx = mouse_world_x - bullet_x
-        dy = mouse_world_y - bullet_y
+    @abstractmethod
+    def shoot(self, ox: float, oy: float, tx: float, ty: float) -> list:
+        ...
 
-        distance = (dx ** 2 + dy ** 2) ** 0.5
+    def update_cooldown(self, dt: float):
+        if self._cooldown > 0:
+            self._cooldown -= dt
 
-        dx /= distance
-        dy /= distance
+    @property
+    def ready(self) -> bool:
+        return self._cooldown <= 0
 
-        bullet_data = {
-            "x": bullet_x,
-            "y": bullet_y,
-            "dx": dx,
-            "dy": dy
-        }
 
-        self.bullets.append(bullet_data)
+class Gun(Weapon):
+    def __init__(self, damage: int = 10, fire_rate: float = 5.0):
+        super().__init__(damage, fire_rate)
 
-    def bulletMove(self):
-
-        for bullet in self.bullets[:]:
-
-            speed = 15
-
-            bullet["x"] += bullet["dx"] * speed
-            bullet["y"] += bullet["dy"] * speed
-
-            self.screen.blit(
-                self.bullet,
-                (
-                    bullet["x"] - self.camerax,
-                    bullet["y"] - self.cameray
-                )
-            )
-
-            if (
-                bullet["x"] < 0
-                or bullet["x"] > 10000
-                or bullet["y"] < 0
-                or bullet["y"] > 10000
-            ):
-                self.bullets.remove(bullet)
+    def shoot(self, ox: float, oy: float, tx: float, ty: float) -> list:
+        if not self.ready:
+            return []
+        dx, dy = tx - ox, ty - oy
+        dist = math.hypot(dx, dy)
+        if dist == 0:
+            return []
+        self._cooldown = 1.0 / self.fire_rate
+        return [Projectile(ox, oy, dx / dist, dy / dist, self.damage)]

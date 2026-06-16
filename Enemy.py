@@ -1,87 +1,78 @@
 import pygame
 import math
+from Entity import Entity
 
 
-class Enemy:
-    def __init__(self, screen, hp, attack, speed):
-        self.image = pygame.image.load("images/tumblr_mjpz8fWmWp1r413h3o1_400.jpg")
-        self.screen = screen
-        self.hp = hp
-        self.attack = attack
-        self.x = 450.0
-        self.y = 200.0
-        self.speed = speed
-        self.world = None
+class Zombie(Entity):
 
-        iw = self.image.get_width()
-        ih = self.image.get_height()
-        self.hb_ox = 10
-        self.hb_oy = 5
-        self.hb_w  = iw - 20
-        self.hb_h  = ih - 10
-        self.hitbox = pygame.Rect(int(self.x) + self.hb_ox, int(self.y) + self.hb_oy, self.hb_w, self.hb_h)
+    IMAGE_PATH = "images/tumblr_mjpz8fWmWp1r413h3o1_400.jpg"
+    VISION_RADIUS = 400   # пикселей — дистанция обнаружения
+    LOSE_RADIUS   = 600   # пикселей — дистанция потери цели
 
-    def _can_move(self, nx, ny):
-        if self.world is None:
-            return True
-        m = 2
-        x0 = nx + self.hb_ox + m
-        y0 = ny + self.hb_oy + m
-        x1 = nx + self.hb_ox + self.hb_w - m
-        y1 = ny + self.hb_oy + self.hb_h - m
-        for cx, cy in [(x0, y0), (x1, y0), (x0, y1), (x1, y1)]:
-            if self.world.is_wall(cx, cy):
-                return False
-        return True
+    def __init__(self, screen: pygame.Surface):
+        super().__init__(screen, hp=50, speed=1.5)
+        self.attack = 5
+        self.aggressive = False   # True = зомби видит игрока и преследует
 
-    def position(self, object_x, object_y):
-        dx = object_x - self.x
-        dy = object_y - self.y
-        distance = math.hypot(dx, dy)
-        if distance == 0:
-            return
-        nx = (dx / distance) * self.speed
-        ny = (dy / distance) * self.speed
-
-        if self._can_move(self.x + nx, self.y):
-            self.x += nx
-        if self._can_move(self.x, self.y + ny):
-            self.y += ny
-
-        self.hitbox.topleft = (int(self.x) + self.hb_ox, int(self.y) + self.hb_oy)
+        self.image = pygame.image.load(self.IMAGE_PATH)
+        # Хитбокс уже спрайта чтобы зомби не застревали в проходах
+        self._setup_hitbox_from_image(margin_x=12, margin_y=4)
 
 
-class Zombie(Enemy):
-    def __init__(self, screen):
-        super().__init__(screen, 50, 5, 1.5)
-
-    def drawing(self, camera_x, camera_y, xCharacter, yCharacter):
-        self.screen.blit(self.image, (self.x - camera_x, self.y - camera_y))
-        pygame.draw.rect(self.screen, (255, 0, 0), self.hitbox.move(-camera_x, -camera_y), 2)
-
-    def check_collision(self, player_rect, player):
-        if not self.hitbox.colliderect(player_rect):
+    def update(self, player: "Entity", all_zombies: list):
+        """Вся логика зомби за один кадр."""
+        if not self.is_alive:
             return
 
-        dx = self.hitbox.centerx - player_rect.centerx
-        dy = self.hitbox.centery - player_rect.centery
-        distance = math.hypot(dx, dy)
+        dist = self.distance_to(player)
 
-        if distance == 0:
-            dx, dy, distance = 1.0, 0.0, 1.0
+        # Агрится только если игрок вошёл в радиус видимости
+        if dist <= self.VISION_RADIUS:
+            self.aggressive = True
 
-        nx = dx / distance
-        ny = dy / distance
+        # Сразу теряет агр если игрок вышел из комнаты зомби
+        if self.world is not None:
+            zombie_room = self.world.get_room(self.x, self.y)
+            player_room = self.world.get_room(player.x, player.y)
+            if zombie_room is not None and zombie_room is not player_room:
+                self.aggressive = False
 
-        push = self.speed
+        # Преследование только если агрессивен
+        if self.aggressive:
+            self.move_toward(player.x, player.y)
+            self._push_away_from(player.rect)
 
-        new_zx = self.x + nx * push
-        new_zy = self.y + ny * push
-        if self._can_move(new_zx, self.y):
-            self.x = new_zx
-        if self._can_move(self.x, new_zy):
-            self.y = new_zy
-        self.hitbox.topleft = (int(self.x) + self.hb_ox, int(self.y) + self.hb_oy)
+        self._separate_from_others(all_zombies)
 
-    def is_hit(self, projectile_rect):
-        return self.hitbox.colliderect(projectile_rect)
+    def _push_away_from(self, player_rect: pygame.Rect):
+        """Отталкивается от игрока при наложении хитбоксов."""
+        if not self.rect.colliderect(player_rect):
+            return
+        dx = self.rect.centerx - player_rect.centerx
+        dy = self.rect.centery - player_rect.centery
+        dist = math.hypot(dx, dy) or 1.0
+        self.try_move(dx / dist * self.speed, dy / dist * self.speed)
+
+    def _separate_from_others(self, others: list):
+        """Не накладывается на других зомби."""
+        for other in others:
+            if other is self or not other.is_alive:
+                continue
+            if not self.rect.colliderect(other.rect):
+                continue
+            dx = self.rect.centerx - other.rect.centerx
+            dy = self.rect.centery - other.rect.centery
+            dist = math.hypot(dx, dy) or 1.0
+            self.try_move(dx / dist * self.speed, dy / dist * self.speed)
+
+    def is_touching(self, player_rect: pygame.Rect) -> bool:
+        return self.rect.colliderect(player_rect)
+
+    #  жесткий рендер                                                           #
+
+    def draw(self, camera_x: int, camera_y: int):
+        if not self.is_alive:
+            return
+        super().draw(camera_x, camera_y)
+        self.draw_hitbox(camera_x, camera_y)
+        self.draw_health_bar(camera_x, camera_y)
