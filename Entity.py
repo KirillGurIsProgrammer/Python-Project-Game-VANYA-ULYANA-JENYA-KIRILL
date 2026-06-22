@@ -70,6 +70,9 @@ class Entity:
     def take_damage(self, amount: int):
         self.hp = max(0, self.hp - amount)
 
+
+
+
     @property
     def is_alive(self) -> bool:
         return self.hp > 0

@@ -5,16 +5,18 @@ from Entity import Entity
 
 class Zombie(Entity):
 
-    IMAGE_PATH = "images/tumblr_mjpz8fWmWp1r413h3o1_400.jpg"
-    VISION_RADIUS = 400   # пикселей — дистанция обнаружения
-    LOSE_RADIUS = 1000   # пикселей — дистанция потери цели
+    image_path = "images/zombie.png"
+    frozen_zombie_path = "images/frozen_zombie.png"
+
+    vision_radius = 400   # пикселей — дистанция обнаружения
+    lose_radius = 1000   # пикселей — дистанция потери цели
 
     def __init__(self, screen: pygame.Surface):
         super().__init__(screen, hp=50, speed=1.5)
         self.attack = 5
         self.aggressive = False   # True = зомби видит игрока и преследует
 
-        self.image = pygame.image.load(self.IMAGE_PATH)
+        self.image = pygame.image.load(self.image_path)
         # Хитбокс уже спрайта чтобы зомби не застревали в проходах
         self._setup_hitbox_from_image(margin_x=12, margin_y=4)
 
@@ -27,7 +29,7 @@ class Zombie(Entity):
         dist = self.distance_to(player)
 
         # Агрится только если игрок вошёл в радиус видимости
-        if dist <= self.VISION_RADIUS:
+        if dist <= self.vision_radius:
             self.aggressive = True
 
         # Сразу теряет агр если игрок вышел из комнаты зомби

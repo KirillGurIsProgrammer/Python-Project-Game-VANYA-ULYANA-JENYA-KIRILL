@@ -82,3 +82,4 @@ class MagicStick(Weapon):
         return [Projectile(ox, oy, dx / dist, dy / dist, self.damage, (0,0,255))]
 
 
+

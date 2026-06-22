@@ -129,7 +129,7 @@ while run:
     )
 
     # --- Камера ---
-    cam_x = int(hero.x) - WIDTH  // 2
+    cam_x = int(hero.x) - WIDTH // 2
     cam_y = int(hero.y) - HEIGHT // 2
     world.cameraX = cam_x
     world.cameraY = cam_y
