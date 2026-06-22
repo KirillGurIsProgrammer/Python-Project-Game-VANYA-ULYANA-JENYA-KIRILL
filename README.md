@@ -29,7 +29,7 @@ Python roguelike-шутер на Pygame — зачисти подземелье 
 🗂️ Структура проекта
 ├── src/
 │   ├── dungeon/
-│   │   └── generation_dungeon.py   # процедурная генерация лабиринтов
+│   │   └── worldGeneration.py   # процедурная генерация лабиринтов
 │   └── entity/
 │       ├── bullet.py               # снаряды
 │       ├── enemy.py                # базовый класс врагов
@@ -37,11 +37,6 @@ Python roguelike-шутер на Pygame — зачисти подземелье 
 │       ├── items.py                # предметы
 │       ├── weapon.py               # оружие
 │       └── player.py               # игрок
-├── config.py                       # константы
-├── game.py                         # основной класс игры
-├── renderer.py                     # отрисовка
-├── handler.py                      # обработчик событий
-├── world.py                        # объекты на карте
 └── main.py                         # точка входа
 ```
 ⚙️ Установка и запуск
