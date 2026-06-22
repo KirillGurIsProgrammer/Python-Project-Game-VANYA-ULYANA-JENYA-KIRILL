@@ -9,7 +9,7 @@ class Projectile:
     SIZE = 7
 
     def __init__(self, x: float, y: float, dx: float, dy: float,
-                 damage: int, speed: float = 15.0, max_range: float = 1500.0):
+                 damage: int, color: tuple[int, int, int], speed: float = 12.0, max_range: float = 1500.0):
         self.x, self.y = x, y
         self.dx, self.dy = dx, dy
         self.damage = damage
@@ -18,6 +18,7 @@ class Projectile:
         self.traveled = 0.0
         self.alive = True
         self.rect = pygame.Rect(int(x), int(y), self.SIZE, self.SIZE)
+        self.color = color
 
     def update(self, world=None):
         self.x += self.dx * self.speed
@@ -29,7 +30,7 @@ class Projectile:
 
     def draw(self, screen: pygame.Surface, camera_x: int, camera_y: int):
         pygame.draw.circle(
-            screen, (255, 220, 0),
+            screen, self.color,
             (int(self.x - camera_x), int(self.y - camera_y)),
             self.SIZE // 2,
         )
@@ -66,4 +67,18 @@ class Gun(Weapon):
         if dist == 0:
             return []
         self._cooldown = 1.0 / self.fire_rate
-        return [Projectile(ox, oy, dx / dist, dy / dist, self.damage)]
+        return [Projectile(ox, oy, dx / dist, dy / dist, self.damage, color = (255, 220, 0))]
+class MagicStick(Weapon):
+    def __init__(self, damage: int = 10,fire_rate: float = 5.0):
+        super().__init__(damage, fire_rate)
+    def shoot(self, ox: float, oy: float, tx: float, ty: float) -> list:
+        if not self.ready:
+            return []
+        dx, dy = tx - ox, ty - oy
+        dist = math.hypot(dx, dy)
+        if dist == 0:
+            return []
+        self._cooldown = 1.0 / self.fire_rate
+        return [Projectile(ox, oy, dx / dist, dy / dist, self.damage, (0,0,255))]
+
+

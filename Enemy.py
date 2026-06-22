@@ -7,7 +7,7 @@ class Zombie(Entity):
 
     IMAGE_PATH = "images/tumblr_mjpz8fWmWp1r413h3o1_400.jpg"
     VISION_RADIUS = 400   # пикселей — дистанция обнаружения
-    LOSE_RADIUS   = 600   # пикселей — дистанция потери цели
+    LOSE_RADIUS = 1000   # пикселей — дистанция потери цели
 
     def __init__(self, screen: pygame.Surface):
         super().__init__(screen, hp=50, speed=1.5)

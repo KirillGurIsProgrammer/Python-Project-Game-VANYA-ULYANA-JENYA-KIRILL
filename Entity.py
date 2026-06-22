@@ -27,7 +27,7 @@ class Entity:
         if self.image is None:
             return
         iw = self.image.get_width()
-        ih = self.image.get_height()
+        ih = self.image.get_height() -10
         self.hb_ox = margin_x
         self.hb_oy = margin_y
         self.hb_w = iw - margin_x * 2

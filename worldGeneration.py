@@ -146,7 +146,7 @@ class WorldGeneration:
                         self.tile_map[y][x] = TILE_WALL
 
     def _trim_corridor_tiles(self):
-        """Оставляем только тайлы коридора вне комнат — они станут дверями."""
+        """Оставляем только тайлы коридора вне комнат - они станут дверями."""
         room_rects = [r.rect for r in self.rooms]
         for key, tiles in self._corridor_tiles.items():
             self._corridor_tiles[key] = [
@@ -238,3 +238,10 @@ class WorldGeneration:
 #проверяем все ли мертвы на карте
     def all_rooms_cleared(self) -> bool:
         return all(room.cleared for room in self.rooms)
+    def get_portal_position(self) -> tuple:
+        """Возвращает мировые координаты центра случайной не-стартовой комнаты."""
+        candidates = self.rooms[1:]  # все кроме стартовой
+        room = random.choice(candidates)
+        cx = room.rect.centerx * self.TILE_SIZE
+        cy = room.rect.centery * self.TILE_SIZE
+        return float(cx), float(cy)
