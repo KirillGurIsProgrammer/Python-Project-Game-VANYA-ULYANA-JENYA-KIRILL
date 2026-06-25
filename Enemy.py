@@ -15,11 +15,27 @@ class Zombie(Entity):
         super().__init__(screen, hp=50, speed=1.5)
         self.attack = 5
         self.aggressive = False   # True = зомби видит игрока и преследует
+        self.is_frozen = False
+        self.freeze_timer = 0
+
 
         self.image = pygame.image.load(self.image_path)
         # Хитбокс уже спрайта чтобы зомби не застревали в проходах
         self._setup_hitbox_from_image(margin_x=12, margin_y=4)
 
+    def hit_by_ice(self):
+        self.is_frozen = True
+        self.freeze_timer = 120
+        self.speed = 0.2
+        self.image = pygame.image.load(self.frozen_zombie_path)
+
+    def update_frozen(self):
+        if self.is_frozen:
+            self.freeze_timer -= 1
+            if self.freeze_timer <= 0:
+                self.is_frozen = False
+                self.speed = 1.5
+                self.image = pygame.image.load(self.image_path)
 
     def update(self, player: "Entity", all_zombies: list):
         """Вся логика зомби за один кадр."""
@@ -68,7 +84,9 @@ class Zombie(Entity):
             self.try_move(dx / dist * self.speed, dy / dist * self.speed)
 
     def is_touching(self, player_rect: pygame.Rect) -> bool:
-        return self.rect.colliderect(player_rect)
+        # inflate(8,8) надувает прямоугольник на 4px с каждой стороны —
+        # pygame.colliderect не засчитывает касание краями без перекрытия
+        return self.rect.inflate(8, 8).colliderect(player_rect)
 
     #  жесткий рендер                                                           #
 

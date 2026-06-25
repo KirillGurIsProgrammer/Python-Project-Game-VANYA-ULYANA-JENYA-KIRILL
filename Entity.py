@@ -27,7 +27,7 @@ class Entity:
         if self.image is None:
             return
         iw = self.image.get_width()
-        ih = self.image.get_height() -10
+        ih = self.image.get_height() - 10
         self.hb_ox = margin_x
         self.hb_oy = margin_y
         self.hb_w = iw - margin_x * 2
@@ -69,9 +69,6 @@ class Entity:
 
     def take_damage(self, amount: int):
         self.hp = max(0, self.hp - amount)
-
-
-
 
     @property
     def is_alive(self) -> bool:
