@@ -58,14 +58,15 @@ class Entity:
             self.y += dy
         self._update_rect()
 
-    def move_toward(self, target_x: float, target_y: float):
+    def move_toward(self, target_x: float, target_y: float, fear: bool):
         """Движется в сторону цели со своей скоростью."""
         dx = target_x - self.x
         dy = target_y - self.y
         dist = math.hypot(dx, dy)
         if dist == 0:
             return
-        self.try_move(dx / dist * self.speed, dy / dist * self.speed)
+        direction = -1 if fear else 1
+        self.try_move(direction * dx / dist * self.speed, direction* dy / dist * self.speed)
 
     def take_damage(self, amount: int):
         self.hp = max(0, self.hp - amount)
