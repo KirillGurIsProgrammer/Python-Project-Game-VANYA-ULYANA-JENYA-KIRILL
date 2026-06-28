@@ -27,6 +27,12 @@ start_screen = StartScreen(screen, WIDTH, HEIGHT)
 game_state = "menu"
 difficulty = None  # <-- НОВАЯ ПЕРЕМЕННАЯ для хранения сложности
 
+# Статистика игры
+score = 0
+level_start_time = 0  # пока не запущен
+total_time = 0
+game_started = False  # флаг, запущен ли таймер
+
 #  Вспомогательные функции
 
 def spawn_zombies(world, screen, spawn_x, spawn_y,
@@ -261,9 +267,13 @@ while run:
     if game_state == "menu":
         action = start_screen.handle_events(events)
         if action == "start":
-            difficulty = start_screen.selected_difficulty  # <-- СОХРАНЯЕМ СЛОЖНОСТЬ
-            print(f"Выбрана сложность: {difficulty}")      # <-- ДЛЯ ПРОВЕРКИ
+            difficulty = start_screen.selected_difficulty
+            print(f"Выбрана сложность: {difficulty}")
             game_state = "playing"
+            # ---- ЗАПУСК ТАЙМЕРА ПРИ СТАРТЕ ИГРЫ ----
+            level_start_time = pygame.time.get_ticks()
+            game_started = True
+            print("Таймер запущен!")
         start_screen.draw()
         pygame.display.update()
         continue
@@ -324,6 +334,10 @@ while run:
                     zombie.afraid()
                 else:
                     zombie.take_damage(p.damage)
+                    # ---- НАЧИСЛЕНИЕ ОЧКОВ ----
+                    if not zombie.is_alive:
+                        score += 10
+                        print(f"Зомби убит! +10 очков. Всего: {score}")  # для отладки
                 p.alive = False
                 break
 
@@ -349,10 +363,12 @@ while run:
     if portal is not None:
         entered = portal.update(hero.rect)
         if entered:
+            total_time += (pygame.time.get_ticks() - level_start_time) / 1000.0
             level += 1
             world, hero, zombies, portal = load_level(level, hero)
             projectiles     = []
             zombie_hit_timers = {}
+            level_start_time = pygame.time.get_ticks()
 
     world.update_doors(
         hero.x + hero.hb_ox + hero.hb_w / 2,
@@ -396,6 +412,20 @@ while run:
     hp_text = font_small.render(f"HP  {int(hero.hp)} / {hero.max_hp}",
                                 True, (255, 255, 255))
     screen.blit(hp_text, (bar_x + 6, bar_y + 3))
+
+    # ---- СТАТИСТИКА (ОЧКИ И ВРЕМЯ) ----
+    if game_started and level_start_time > 0:
+        current_time = (pygame.time.get_ticks() - level_start_time) / 1000.0
+        time_text = font_small.render(f"Time: {current_time:.1f}s", True, (255, 255, 200))
+    else:
+        time_text = font_small.render(f"Time: 0.0s", True, (255, 255, 200))
+    screen.blit(time_text, (20, 85))
+
+    score_text = font_small.render(f"Score: {score}", True, (255, 255, 200))
+    screen.blit(score_text, (20, 55))
+    
+    diff_text = font_small.render(f"Difficulty: {difficulty.upper() if difficulty else 'N/A'}", True, (255, 255, 200))
+    screen.blit(diff_text, (20, 115))
 
     # HUD - уровень
     level_text = font.render(f"Level {level}", True, (255, 255, 255))
