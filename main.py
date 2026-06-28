@@ -6,6 +6,7 @@ from Enemy import Zombie
 from Gun import Gun, MagicStick, Fear, HealOrb
 from Portal import Portal
 from worldGeneration import WorldGeneration
+from Screens import StartScreen
 
 #  Инициализация
 
@@ -20,6 +21,11 @@ pygame.display.set_icon(pygame.image.load("images/golden-gate.png"))
 font       = pygame.font.SysFont(None, 36)
 font_small = pygame.font.SysFont(None, 26)
 font_tiny  = pygame.font.SysFont(None, 20)
+
+# ---------- СТАРТОВОЕ ОКНО ----------
+start_screen = StartScreen(screen, WIDTH, HEIGHT)
+game_state = "menu"
+difficulty = None  # <-- НОВАЯ ПЕРЕМЕННАЯ для хранения сложности
 
 #  Вспомогательные функции
 
@@ -240,16 +246,29 @@ zombie_hit_timers = {}
 run = True
 while run:
     dt = clock.tick(60) / 1000.0
+    events = pygame.event.get()
 
     if portal is None and world.all_rooms_cleared():
         px, py = world.get_portal_position()
         portal = Portal(px, py)
 
     # ---- События ----
-    for event in pygame.event.get():
+    for event in events:
         if event.type == pygame.QUIT:
             run = False
 
+    # ---- СТАРТОВОЕ ОКНО ----
+    if game_state == "menu":
+        action = start_screen.handle_events(events)
+        if action == "start":
+            difficulty = start_screen.selected_difficulty  # <-- СОХРАНЯЕМ СЛОЖНОСТЬ
+            print(f"Выбрана сложность: {difficulty}")      # <-- ДЛЯ ПРОВЕРКИ
+            game_state = "playing"
+        start_screen.draw()
+        pygame.display.update()
+        continue
+
+    for event in events:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
                 weapon_idx = (weapon_idx + 1) % len(weapons)
