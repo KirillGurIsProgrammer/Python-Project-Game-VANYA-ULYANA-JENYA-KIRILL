@@ -111,3 +111,93 @@ class StartScreen:
                                           True, (255, 200, 100))
             hint_rect = hint.get_rect(center=(self.width // 2, self.height // 2 + 100))
             self.screen.blit(hint, hint_rect)
+
+
+
+class EndScreen:
+
+    def __init__(self, screen: pygame.Surface, width: int, height: int):
+        self.screen = screen
+        self.width = width
+        self.height = height
+        self.font_title = pygame.font.SysFont(None, 72)
+        self.font_stats = pygame.font.SysFont(None, 48)
+        self.font_button = pygame.font.SysFont(None, 36)
+        
+        # Кнопка возврата в меню
+        self.button_menu = Button(
+            width // 2 - 120, height // 2 + 100, 240, 60,
+            "Back to Menu", self.font_button,
+            (50, 100, 150), (80, 140, 200), (255, 255, 255)
+        )
+
+    def handle_events(self, events):
+        for event in events:
+            if self.button_menu.handle_event(event):
+                return "menu"
+        return None
+
+    def draw(self, final_score: int):
+        self.screen.fill((30, 15, 50))
+        
+        # Заголовок
+        title = self.font_title.render("THE END", True, (255, 215, 0))  # Золотой цвет
+        title_rect = title.get_rect(center=(self.width // 2, self.height // 4))
+        self.screen.blit(title, title_rect)
+        
+        sub_title = self.font_stats.render("You survived!", True, (200, 200, 250))
+        sub_title_rect = sub_title.get_rect(center=(self.width // 2, self.height // 4 + 60))
+        self.screen.blit(sub_title, sub_title_rect)
+        
+        # Отображение финальных очков
+        score_text = self.font_stats.render(f"Final Score: {final_score}", True, (255, 255, 200))
+        score_rect = score_text.get_rect(center=(self.width // 2, self.height // 2))
+        self.screen.blit(score_text, score_rect)
+        
+        # Кнопка меню
+        self.button_menu.draw(self.screen)
+
+
+class GameOverScreen:
+
+    def __init__(self, screen, width, height):
+        self.screen = screen
+        self.width = width
+        self.height = height
+        self.font_title = pygame.font.SysFont(None, 72)
+        self.font_subtitle = pygame.font.SysFont(None, 36)
+        self.font_stats = pygame.font.SysFont(None, 48)
+        self.font_button = pygame.font.SysFont(None, 36)
+        
+        # Кнопка возврата в меню
+        self.button_menu = Button(
+            width // 2 - 120, height // 2 + 120, 240, 60,
+            "Back to Menu", self.font_button,
+            (150, 50, 50), (200, 80, 80), (255, 255, 255)
+        )
+
+    def handle_events(self, events):
+        for event in events:
+            if self.button_menu.handle_event(event):
+                return "menu"
+        return None
+
+    def draw(self, final_score):
+        self.screen.fill((40, 10, 10))
+        
+        # Заголовок
+        title = self.font_title.render("YOU DIED", True, (220, 40, 40))
+        title_rect = title.get_rect(center=(self.width // 2, self.height // 4))
+        self.screen.blit(title, title_rect)
+
+        subtitle = self.font_subtitle.render("Game over. Try again", True, (180, 150, 150))
+        subtitle_rect = subtitle.get_rect(center=(self.width // 2, self.height // 4 + 60))
+        self.screen.blit(subtitle, subtitle_rect)
+        
+        # Показ заработанных очков
+        score_text = self.font_stats.render(f"Final Score: {final_score}", True, (255, 255, 200))
+        score_rect = score_text.get_rect(center=(self.width // 2, self.height // 2 + 20))
+        self.screen.blit(score_text, score_rect)
+        
+        # Кнопка меню
+        self.button_menu.draw(self.screen)
