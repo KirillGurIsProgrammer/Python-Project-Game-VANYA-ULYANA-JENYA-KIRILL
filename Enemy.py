@@ -2,6 +2,20 @@ import pygame
 import math
 from Entity import Entity
 
+class Enemy(Entity):
+    def __init__(self, screen: pygame.Surface, hp, speed, attack, image):
+        super().__init__(screen, hp=hp, speed= speed)
+        self.attack = attack
+        self.aggressive = False
+        self.is_frozen = False
+        self.is_afraid = False
+        self.freeze_timer = 0
+        self.fear_timer = 0
+        self._base_speed = 1.5
+        self.image = image
+
+
+
 
 class Zombie(Entity):
 
@@ -38,13 +52,13 @@ class Zombie(Entity):
             self.freeze_timer -= 1
             if self.freeze_timer <= 0:
                 self.is_frozen = False
-                self.speed     = self._base_speed
-                self.image     = pygame.image.load(self.image_path)
+                self.speed = self._base_speed
+                self.image = pygame.image.load(self.image_path)
 
     def afraid(self):
-        self.is_afraid  = True
+        self.is_afraid = True
         self.fear_timer = 150
-        self.image      = pygame.image.load(self.fear_zombie)
+        self.image = pygame.image.load(self.fear_zombie)
 
     def update_fear(self):
         if self.is_afraid:

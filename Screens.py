@@ -51,7 +51,7 @@ class StartScreen:
         
         self.button_hard = Button(width // 2 + 30, height // 2 + 30, 130, 50,
                                   "Hard", self.font_small,
-                                  (150, 50, 50), (200, 80, 80), (255, 255, 255))
+                                  (255, 36, 0), (200, 80, 80), (255, 255, 255))
 
     def handle_events(self, events):
         for event in events:
@@ -103,7 +103,7 @@ class StartScreen:
         # Если сложность выбрана, показываем подсказку
         if self.selected_difficulty is not None:
             hint = self.font_small.render(f"Selected: {self.selected_difficulty.upper()}", 
-                                          True, (100, 255, 100))
+                                          True, (100, 255, 100) if self.selected_difficulty == "easy" else (255, 36, 0))
             hint_rect = hint.get_rect(center=(self.width // 2, self.height // 2 + 100))
             self.screen.blit(hint, hint_rect)
         else:
