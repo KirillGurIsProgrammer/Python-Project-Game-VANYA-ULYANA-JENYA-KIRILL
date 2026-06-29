@@ -113,7 +113,6 @@ class StartScreen:
             self.screen.blit(hint, hint_rect)
 
 
-
 class EndScreen:
 
     def __init__(self, screen: pygame.Surface, width: int, height: int):
