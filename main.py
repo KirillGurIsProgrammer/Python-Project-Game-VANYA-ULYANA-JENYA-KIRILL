@@ -2,7 +2,7 @@ import pygame
 
 from Gun import Gun, MagicStick, Fear, HealOrb
 from Portal import Portal
-from Screens import StartScreen
+from Screens import StartScreen, EndScreen, GameOverScreen
 
 from HUD import HUD
 from WeaponHUD import WeaponHUD
@@ -22,10 +22,12 @@ pygame.display.set_caption("Running through the fog — DVFU EDITION")
 pygame.display.set_icon(pygame.image.load("images/golden-gate.png"))
 
 # ------------------------------------------------------------------ #
-#  Стартовое окно                                                      #
+#  Окна                                                                #
 # ------------------------------------------------------------------ #
 
 start_screen = StartScreen(screen, WIDTH, HEIGHT)
+end_screen = EndScreen(screen, WIDTH, HEIGHT)
+game_over_screen = GameOverScreen(screen, WIDTH, HEIGHT)
 game_state   = "menu"
 difficulty   = None
 
@@ -92,7 +94,33 @@ while run:
             game_state       = "playing"
             level_start_time = pygame.time.get_ticks()
             game_started     = True
+            score            = 0  # Сбрасываем очки перед новой игрой
+            # --- Перезапуск ---
+            manager.start() 
+            projectiles = []
+            combat.reset()
+            from Gun import HealOrb
+            HealOrb.heal_used = False
+            # ------------------------------------------
         start_screen.draw()
+        pygame.display.update()
+        continue
+
+    # ---- Финальный экран ----
+    if game_state == "end":
+        action = end_screen.handle_events(events)
+        if action == "menu":
+            game_state = "menu"
+        end_screen.draw(score)
+        pygame.display.update()
+        continue
+
+    # ---- Экран смерти ----
+    if game_state == "game_over":
+        action = game_over_screen.handle_events(events)
+        if action == "menu":
+            game_state = "menu"
+        game_over_screen.draw(score)
         pygame.display.update()
         continue
 
@@ -137,6 +165,10 @@ while run:
     hero  = manager.hero
     world = manager.world
 
+    if not hero.is_alive:
+        game_state = "game_over"
+        continue
+
     for _, w in weapons:
         w.update_cooldown(dt)
 
@@ -163,6 +195,8 @@ while run:
         entered = manager.portal.update(hero.rect)
         if entered:
             manager.next_level()
+            if manager.level > 5:
+                game_state = "end"
             projectiles      = []
             combat.reset()
             level_start_time = pygame.time.get_ticks()
