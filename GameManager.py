@@ -12,13 +12,12 @@ class GameManager:
     SAFE_RADIUS = 200.0
     ZOMBIES_PER_ROOM = 3
 
-    # Бандиты начинают появляться начиная с этого уровня (после 2-го),
-    # с указанным шансом вместо обычного зомби на каждой точке спавна.
     BANDIT_MIN_LEVEL = 2
     BANDIT_CHANCE = 0.3
 
-    def __init__(self, screen):
+    def __init__(self, screen, difficulty):
         self.screen = screen
+        self.difficulty = difficulty
 
         self.world = None
         self.hero = None
@@ -44,7 +43,10 @@ class GameManager:
         spawn_x, spawn_y = world.get_spawn()
 
         if not reuse_hero or self.hero is None:
-            hero = Nerd(self.screen)
+            if self.difficulty == "easy":
+                hero = Nerd(self.screen, hp=150, damage=50)
+            else:
+                hero = Nerd(self.screen, hp=100, damage=30)
         else:
             hero = self.hero
 

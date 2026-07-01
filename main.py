@@ -38,7 +38,7 @@ difficulty = None
 
 hud = HUD(screen, WIDTH, HEIGHT)
 weapon_hud = WeaponHUD(screen, WIDTH, HEIGHT)
-manager = GameManager(screen)
+manager = GameManager(screen, difficulty)
 combat = CombatSystem()
 
 # ------------------------------------------------------------------ #
@@ -93,6 +93,7 @@ while run:
         action = start_screen.handle_events(events)
         if action == "start":
             difficulty       = start_screen.selected_difficulty
+            manager.difficulty = difficulty
             game_state       = "playing"
             level_start_time = pygame.time.get_ticks()
             game_started     = True
@@ -143,6 +144,11 @@ while run:
             if event.key == pygame.K_4: weapon_idx = 3
             if event.key == pygame.K_r:
                 gun.start_reload()
+        if event.type == pygame.MOUSEWHEEL:
+            if event.y > 0:
+                weapon_idx = (weapon_idx + 1) % len(weapons)
+            elif event.y < 0:
+                weapon_idx = (weapon_idx - 1) % len(weapons)
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             cam_x = int(manager.hero.x) - WIDTH  // 2
@@ -165,7 +171,7 @@ while run:
     #  Обновление                                                          #
     # ------------------------------------------------------------------ #
 
-    hero  = manager.hero
+    hero = manager.hero
     world = manager.world
 
     if not hero.is_alive:
@@ -206,9 +212,9 @@ while run:
         entered = manager.portal.update(hero.rect)
         if entered:
             manager.next_level()
-            if manager.level > 5:
+            if manager.level == 4:
                 game_state = "end"
-            projectiles       = []
+            projectiles = []
             enemy_projectiles = []
             combat.reset()
             level_start_time = pygame.time.get_ticks()

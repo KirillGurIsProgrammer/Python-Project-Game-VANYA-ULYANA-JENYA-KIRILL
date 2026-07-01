@@ -43,5 +43,5 @@ class Character(Entity):
 
 
 class Nerd(Character):
-    def __init__(self, screen: pygame.Surface):
-        super().__init__(screen, hp=100, damage=10)
+    def __init__(self, screen: pygame.Surface, hp, damage):
+        super().__init__(screen, hp, damage)
