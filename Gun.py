@@ -42,6 +42,11 @@ class Projectile:
             pygame.draw.circle(screen, (120, 0, 180),   (cx, cy), r + 4)
             pygame.draw.circle(screen, (200, 100, 255), (cx, cy), r)
             pygame.draw.circle(screen, (255, 200, 255), (cx, cy), max(1, r-2))
+        elif self.kind == "bandit":
+            # Ржаво-красная пуля бандита — хорошо заметна, чтобы легко уклоняться
+            pygame.draw.circle(screen, (120, 30, 15),   (cx, cy), r + 3)
+            pygame.draw.circle(screen, (220, 70, 30),   (cx, cy), r + 1)
+            pygame.draw.circle(screen, (255, 190, 120), (cx, cy), max(1, r - 2))
         else:
             pygame.draw.circle(screen, (255, 200, 0),   (cx, cy), r)
             pygame.draw.circle(screen, (255, 255, 180), (cx, cy), max(1, r-1))
@@ -296,3 +301,33 @@ class HealOrb(Weapon):
         HealOrb.heal_used = True
         hero.hp = min(hero.max_hp, hero.hp + self.HEAL_AMOUNT)
         return True
+
+
+#  BanditGun — оружие бандита. Очень медленные пули, чтобы от них было
+#  легко уклоняться, компенсируя это тем, что бандит сам быстрый и хрупкий.
+
+class BanditGun(Weapon):
+    BULLET_SPEED = 4.0      # намеренно медленно — легко увернуться
+    BULLET_RANGE = 900.0
+
+    def __init__(self, damage=8, fire_rate=0.7):
+        super().__init__(damage, fire_rate)
+
+    def _make_projectile(self, ox, oy, tx, ty):
+        dx, dy = tx - ox, ty - oy
+        dist = math.hypot(dx, dy)
+        if dist == 0:
+            return None
+        return Projectile(ox, oy, dx / dist, dy / dist,
+                          self.damage, color=(220, 70, 30),
+                          speed=self.BULLET_SPEED,
+                          max_range=self.BULLET_RANGE, kind="bandit")
+
+    def shoot(self, ox, oy, tx, ty):
+        if not self.ready:
+            return []
+        p = self._make_projectile(ox, oy, tx, ty)
+        if p is None:
+            return []
+        self._cooldown = 1.0 / self.fire_rate
+        return [p]

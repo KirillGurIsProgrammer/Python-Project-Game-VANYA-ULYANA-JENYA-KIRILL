@@ -12,9 +12,12 @@ class CombatSystem:
     #  Публичные методы                                                    #
 
     def update(self, dt: float,
-               hero, alive_zombies: list, projectiles: list) -> int:
+               hero, alive_zombies: list, projectiles: list,
+               enemy_projectiles: list | None = None) -> int:
         score_gained = self._resolve_projectiles(projectiles, alive_zombies, hero)
         self._resolve_melee(dt, hero, alive_zombies)
+        if enemy_projectiles:
+            self._resolve_enemy_projectiles(enemy_projectiles, hero)
         return score_gained
 
     def reset(self) -> None:
@@ -51,6 +54,15 @@ class CombatSystem:
                 break
 
         return score_gained
+
+    def _resolve_enemy_projectiles(self, enemy_projectiles: list, hero) -> None:
+        """Пули врагов (например, бандита), долетевшие до героя."""
+        for p in enemy_projectiles:
+            if not p.alive:
+                continue
+            if hero.rect.colliderect(p.rect):
+                hero.take_damage(p.damage)
+                p.alive = False
 
     def _resolve_melee(self, dt: float, hero, alive_zombies: list) -> None:
         for zombie in alive_zombies:

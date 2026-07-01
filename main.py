@@ -3,6 +3,7 @@ import pygame
 from Gun import Gun, MagicStick, Fear, HealOrb
 from Portal import Portal
 from Screens import StartScreen, EndScreen, GameOverScreen
+from Enemy import Bandit
 
 from HUD import HUD
 from WeaponHUD import WeaponHUD
@@ -28,17 +29,17 @@ pygame.display.set_icon(pygame.image.load("images/golden-gate.png"))
 start_screen = StartScreen(screen, WIDTH, HEIGHT)
 end_screen = EndScreen(screen, WIDTH, HEIGHT)
 game_over_screen = GameOverScreen(screen, WIDTH, HEIGHT)
-game_state   = "menu"
-difficulty   = None
+game_state = "menu"
+difficulty = None
 
 # ------------------------------------------------------------------ #
 #  Подсистемы                                                          #
 # ------------------------------------------------------------------ #
 
-hud        = HUD(screen, WIDTH, HEIGHT)
+hud = HUD(screen, WIDTH, HEIGHT)
 weapon_hud = WeaponHUD(screen, WIDTH, HEIGHT)
-manager    = GameManager(screen)
-combat     = CombatSystem()
+manager = GameManager(screen)
+combat = CombatSystem()
 
 # ------------------------------------------------------------------ #
 #  Оружия                                                              #
@@ -71,6 +72,7 @@ game_started     = False
 
 manager.start()
 projectiles = []
+enemy_projectiles = []
 
 # ------------------------------------------------------------------ #
 #  Игровой цикл                                                        #
@@ -96,8 +98,9 @@ while run:
             game_started     = True
             score            = 0  # Сбрасываем очки перед новой игрой
             # --- Перезапуск ---
-            manager.start() 
+            manager.start()
             projectiles = []
+            enemy_projectiles = []
             combat.reset()
             from Gun import HealOrb
             HealOrb.heal_used = False
@@ -174,17 +177,25 @@ while run:
 
     hero.handle_input()
 
-    alive_zombies = [z for z in manager.zombies if z.is_alive]
-    for zombie in alive_zombies:
-        zombie.update(hero, alive_zombies)
-        zombie.update_frozen()
-        zombie.update_fear()
+    alive_enemies = [e for e in manager.enemies if e.is_alive]
+    for enemy in alive_enemies:
+        enemy.update(hero, alive_enemies)
+        enemy.update_frozen()
+        enemy.update_fear()
+
+        if isinstance(enemy, Bandit):
+            enemy.update_weapon_cooldown(dt)
+            enemy_projectiles.extend(enemy.try_shoot(hero))
 
     for p in projectiles:
         p.update(world)
 
-    score += combat.update(dt, hero, alive_zombies, projectiles)
+    for p in enemy_projectiles:
+        p.update(world)
+
+    score += combat.update(dt, hero, alive_enemies, projectiles, enemy_projectiles)
     projectiles = [p for p in projectiles if p.alive]
+    enemy_projectiles = [p for p in enemy_projectiles if p.alive]
 
     # Портал: появляется когда все комнаты зачищены
     if manager.portal is None and world.all_rooms_cleared():
@@ -197,7 +208,8 @@ while run:
             manager.next_level()
             if manager.level > 5:
                 game_state = "end"
-            projectiles      = []
+            projectiles       = []
+            enemy_projectiles = []
             combat.reset()
             level_start_time = pygame.time.get_ticks()
 
@@ -228,10 +240,13 @@ while run:
 
     hero.draw(cam_x, cam_y)
 
-    for zombie in alive_zombies:
-        zombie.draw(cam_x, cam_y)
+    for enemy in alive_enemies:
+        enemy.draw(cam_x, cam_y)
 
     for p in projectiles:
+        p.draw(screen, cam_x, cam_y)
+
+    for p in enemy_projectiles:
         p.draw(screen, cam_x, cam_y)
 
     hud.draw(hero, manager.level, score,
