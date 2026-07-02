@@ -1,12 +1,10 @@
 import pygame
 import math
 
-from Gun import Gun, MagicStick, HealOrb
+from Gun import Gun, Freeze, HealOrb
 
 
-# ------------------------------------------------------------------ #
-#  Цвета слотов                                                        #
-# ------------------------------------------------------------------ #
+
 
 WEAPON_COLORS = {
     "Пули":      (255, 210,  50),
@@ -17,21 +15,17 @@ WEAPON_COLORS = {
 
 
 class WeaponHUD:
-    """
-    Панель оружий внизу экрана: слоты, иконки, заряды/обойма,
-    полоски перезарядки/восстановления.
-    """
 
-    SLOT_W   = 150
-    SLOT_H   = 80
-    GAP      = 8
-    PADDING  = 12
-    RADIUS   = 10
+    SLOT_W = 150
+    SLOT_H = 80
+    GAP = 8
+    PADDING = 12
+    RADIUS = 10
 
     def __init__(self, screen, width: int, height: int):
-        self.screen  = screen
-        self.width   = width
-        self.height  = height
+        self.screen = screen
+        self.width = width
+        self.height = height
 
         self.font_small = pygame.font.SysFont(None, 26)
         self.font_tiny  = pygame.font.SysFont(None, 20)
@@ -46,9 +40,9 @@ class WeaponHUD:
         self._draw_background_panel(total_w, start_x, y)
 
         for i, (name, weapon) in enumerate(weapons):
-            x      = start_x + i * (self.SLOT_W + self.GAP)
+            x = start_x + i * (self.SLOT_W + self.GAP)
             active = (i == current_idx)
-            color  = WEAPON_COLORS.get(name, (150, 150, 150))
+            color = WEAPON_COLORS.get(name, (150, 150, 150))
             self._draw_slot(x, y, name, weapon, active, color, i)
 
 
@@ -84,11 +78,9 @@ class WeaponHUD:
                 (0, 0, self.SLOT_W, self.SLOT_H), 1, border_radius=self.RADIUS)
         self.screen.blit(sl, (x, y))
 
-        # иконка
         icon_color = color if active else tuple(c // 2 for c in color)
         self._draw_icon(name, x + 20, y + self.SLOT_H // 2 - 4, icon_color)
 
-        # название и клавиша
         label_color = color if active else (160, 160, 180)
         label = self.font_small.render(name, True, label_color)
         self.screen.blit(label, (x + 38, y + 6))
@@ -98,7 +90,6 @@ class WeaponHUD:
         self.screen.blit(key_lbl,
                          (x + 38, y + self.SLOT_H - key_lbl.get_height() - 5))
 
-        # заряды / перезарядка
         self._draw_weapon_state(x, y, weapon, color)
 
     def _draw_weapon_state(self, x: int, y: int, weapon, color: tuple) -> None:

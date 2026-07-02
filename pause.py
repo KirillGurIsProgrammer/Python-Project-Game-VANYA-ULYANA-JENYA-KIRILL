@@ -11,7 +11,6 @@ class PauseWindow:
         self.font = pygame.font.SysFont(None, 48)
         self.font_small = pygame.font.SysFont(None, 32)
         
-        # Создаём кнопки
         self.button_continue = Button(
             width // 2 - 120, height // 2 - 20, 240, 60,
             "Continue", self.font,
@@ -24,13 +23,11 @@ class PauseWindow:
             (150, 50, 50), (200, 80, 80), (255, 255, 255)
         )
         
-        # Полупрозрачный фон
         self.overlay = pygame.Surface((width, height))
         self.overlay.set_alpha(180)
         self.overlay.fill((0, 0, 0))
     
     def reset(self):
-        # Сброс состояния при открытии паузы
         pass
     
     def handle_events(self, events):
@@ -75,7 +72,6 @@ class PauseWindow:
         while result is None:
             events = pygame.event.get()
             
-            # Обработка закрытия окна
             for event in events:
                 if event.type == pygame.QUIT:
                     return "quit"

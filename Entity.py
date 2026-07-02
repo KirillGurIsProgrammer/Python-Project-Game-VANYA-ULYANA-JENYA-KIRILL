@@ -3,7 +3,6 @@ import math
 
 
 class Entity:
-    """Базовый класс для всех существ в игре (персонаж, враги)."""
 
     def __init__(self, screen: pygame.Surface, hp: int, speed: float):
         self.screen = screen
@@ -15,7 +14,6 @@ class Entity:
         self.world = None
         self.image: pygame.Surface | None = None
 
-        # Хитбокс: переопределяется в подклассах после загрузки image
         self.hb_ox = 0
         self.hb_oy = 0
         self.hb_w = 32
@@ -51,7 +49,6 @@ class Entity:
         return not any(self.world.is_wall(cx, cy) for cx, cy in corners)
 
     def try_move(self, dx: float, dy: float):
-        """Перемещает сущность с раздельной проверкой осей (скольжение по стенам)."""
         if self._can_move(self.x + dx, self.y):
             self.x += dx
         if self._can_move(self.x, self.y + dy):
@@ -59,7 +56,6 @@ class Entity:
         self._update_rect()
 
     def move_toward(self, target_x: float, target_y: float, fear: bool):
-        """Движется в сторону цели со своей скоростью."""
         dx = target_x - self.x
         dy = target_y - self.y
         dist = math.hypot(dx, dy)

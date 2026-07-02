@@ -13,7 +13,7 @@ class GameManager:
     ZOMBIES_PER_ROOM = 3
 
     BANDIT_MIN_LEVEL = 2
-    BANDIT_CHANCE = 0.3
+    BANDIT_CHANCE = 0.5
 
     def __init__(self, screen, difficulty):
         self.screen = screen
@@ -27,16 +27,12 @@ class GameManager:
 
 
     def start(self) -> None:
-        """Загружает первый уровень с нуля."""
         self.level = 1
         self._load_level(reuse_hero=False)
 
     def next_level(self) -> None:
-        """Переходит на следующий уровень, сохраняя героя."""
         self.level += 1
         self._load_level(reuse_hero=True)
-
-
 
     def _load_level(self, reuse_hero: bool) -> None:
         world = WorldGeneration()

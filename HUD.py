@@ -2,11 +2,6 @@ import pygame
 
 
 class HUD:
-    """
-    Отвечает за отрисовку статического интерфейса:
-    полоска HP, очки, время, уровень, сложность.
-    """
-
     def __init__(self, screen, width: int, height: int):
         self.screen = screen
         self.width = width
@@ -20,7 +15,6 @@ class HUD:
     def draw(self, hero, level: int, score: int,
              game_started: bool, level_start_time: int,
              difficulty: str | None) -> None:
-        """Рисует весь статический HUD за один вызов."""
         self._draw_hp_bar(hero)
         self._draw_score(score)
         self._draw_time(game_started, level_start_time)

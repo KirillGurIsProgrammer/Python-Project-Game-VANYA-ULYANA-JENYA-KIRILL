@@ -1,15 +1,14 @@
-from Gun import MagicStick
+from Gun import Freeze
+from sound_manager import SoundManager
 
 
 class CombatSystem:
 
-
-    ZOMBIE_ATTACK_INTERVAL = 0.8  # секунды между ударами
+    ZOMBIE_ATTACK_INTERVAL = 0.5
 
     def __init__(self):
         self._zombie_hit_timers: dict[int, float] = {}
-
-    #  Публичные методы                                                    #
+        self.sound = SoundManager()
 
     def update(self, dt: float,
                hero, alive_zombies: list, projectiles: list,
@@ -21,9 +20,7 @@ class CombatSystem:
         return score_gained
 
     def reset(self) -> None:
-        """Сбрасывает таймеры урона (при смене уровня)."""
         self._zombie_hit_timers.clear()
-
 
     def _resolve_projectiles(self, projectiles: list,
                               alive_zombies: list, hero) -> int:
@@ -38,17 +35,20 @@ class CombatSystem:
                 if p.kind == "ice":
                     zombie.hit_by_ice()
                     zombie.take_damage(p.damage)
+                    self.sound.play_hit()
                     hero.hp = min(
                         hero.max_hp,
-                        hero.hp + MagicStick.HEAL_AMOUNT // 3,
+                        hero.hp + Freeze.HEAL_AMOUNT // 3,
                     )
                 elif p.kind == "fear":
                     zombie.afraid()
                 else:
                     zombie.take_damage(p.damage)
+                    self.sound.play_hit()
 
                 if not zombie.is_alive:
                     score_gained += 10
+                    self.sound.play_enemy_death()
 
                 p.alive = False
                 break
@@ -56,12 +56,12 @@ class CombatSystem:
         return score_gained
 
     def _resolve_enemy_projectiles(self, enemy_projectiles: list, hero) -> None:
-        """Пули врагов (например, бандита), долетевшие до героя."""
         for p in enemy_projectiles:
             if not p.alive:
                 continue
             if hero.rect.colliderect(p.rect):
                 hero.take_damage(p.damage)
+                self.sound.play_player_hit()
                 p.alive = False
 
     def _resolve_melee(self, dt: float, hero, alive_zombies: list) -> None:
@@ -74,6 +74,7 @@ class CombatSystem:
             timer = self._zombie_hit_timers.get(zid, 0.0) - dt
             if timer <= 0:
                 hero.take_damage(zombie.attack)
+                self.sound.play_player_hit()
                 timer = self.ZOMBIE_ATTACK_INTERVAL
             self._zombie_hit_timers[zid] = timer
 

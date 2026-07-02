@@ -4,19 +4,17 @@ import math
 
 TILE_EMPTY = 0
 TILE_FLOOR = 1
-TILE_WALL  = 2
+TILE_WALL = 2
 
 
 class Room:
-    """Одна комната: тайловый прямоугольник + список врагов."""
     def __init__(self, rect: pygame.Rect):
         self.rect = rect
         self.enemies: list = []
-        self.visited = False    # игрок хотя бы раз заходил в комнату
+        self.visited = False
 
     @property
     def cleared(self) -> bool:
-        """Очищена если нет живых врагов."""
         return all(not e.is_alive for e in self.enemies) if self.enemies else True
 
 
@@ -52,7 +50,6 @@ class WorldGeneration:
         self.rooms: list[Room] = []
         self.spawn = (0, 0)
 
-        # (min_idx, max_idx) -> список тайлов коридора вне комнат
         self._corridor_tiles: dict[tuple, list] = {}
 
         self.floor = pygame.transform.scale(
@@ -66,7 +63,6 @@ class WorldGeneration:
 
         self._generate()
 
-    #  Генерация                                                           #
 
     def _generate(self):
         self.tile_map = [[TILE_EMPTY] * self.map_w for _ in range(self.map_h)]
@@ -146,7 +142,6 @@ class WorldGeneration:
                         self.tile_map[y][x] = TILE_WALL
 
     def _trim_corridor_tiles(self):
-        """Оставляем только тайлы коридора вне комнат - они станут дверями."""
         room_rects = [r.rect for r in self.rooms]
         for key, tiles in self._corridor_tiles.items():
             self._corridor_tiles[key] = [
@@ -154,12 +149,10 @@ class WorldGeneration:
                 if not any(r.collidepoint(tx, ty) for r in room_rects)
             ]
 
-    #  Логика дверей                                                       #
 
     def update_doors(self, player_cx: float, player_cy: float,
                      player_hw: float = 16, player_hh: float = 20):
 
-        # Углы хитбокса игрока
         corners = [
             (player_cx - player_hw, player_cy - player_hh),
             (player_cx + player_hw, player_cy - player_hh),
@@ -167,7 +160,6 @@ class WorldGeneration:
             (player_cx + player_hw, player_cy + player_hh),
         ]
 
-        # Комната считается "достигнутой" только если все углы внутри неё
         for room in self.rooms:
             if not room.visited:
                 if all(room.contains_point(cx, cy, self.TILE_SIZE) for cx, cy in corners):
@@ -176,7 +168,6 @@ class WorldGeneration:
         for (ia, ib), tiles in self._corridor_tiles.items():
             ra, rb = self.rooms[ia], self.rooms[ib]
 
-            # Дверь заперта если хотя бы одна посещённая комната не очищена
             locked = (ra.visited and not ra.cleared) or (rb.visited and not rb.cleared)
 
             tile_type = TILE_WALL if locked else TILE_FLOOR
@@ -184,13 +175,11 @@ class WorldGeneration:
                 self.tile_map[ty][tx] = tile_type
 
     def get_room(self, world_x: float, world_y: float) -> "Room | None":
-        """Возвращает комнату в которой находится точка, или None."""
         for room in self.rooms:
             if room.contains_point(world_x, world_y, self.TILE_SIZE):
                 return room
         return None
 
-    #  Утилиты                                                             #
 
     def is_wall(self, world_x: float, world_y: float) -> bool:
         tx = int(world_x) // self.TILE_SIZE
@@ -202,7 +191,6 @@ class WorldGeneration:
     def get_spawn(self) -> tuple:
         return self.spawn
 
-    #  Отрисовка                                                           #
 
     def draw(self, screen: pygame.Surface):
         ts = self.TILE_SIZE
@@ -226,7 +214,6 @@ class WorldGeneration:
                 else:
                     screen.blit(self.grass, (px, py))
 
-        # Заливаем края экрана чёрным
         lx = start_x * ts - self.cameraX
         ty0 = start_y * ts - self.cameraY
         rx = end_x * ts - self.cameraX
@@ -235,12 +222,10 @@ class WorldGeneration:
         if ty0 > 0: screen.fill((0,0,0), (0,   0,   sw,      ty0))
         if rx < sw: screen.fill((0,0,0), (rx,  0,   sw - rx, sh))
         if by < sh: screen.fill((0,0,0), (0,   by,  sw,      sh - by))
-#проверяем все ли мертвы на карте
     def all_rooms_cleared(self) -> bool:
         return all(room.cleared for room in self.rooms)
     def get_portal_position(self) -> tuple:
-        """Возвращает мировые координаты центра случайной не-стартовой комнаты."""
-        candidates = self.rooms[1:]  # все кроме стартовой
+        candidates = self.rooms[1:]
         room = random.choice(candidates)
         cx = room.rect.centerx * self.TILE_SIZE
         cy = room.rect.centery * self.TILE_SIZE

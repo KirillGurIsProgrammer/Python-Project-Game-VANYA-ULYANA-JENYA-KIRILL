@@ -4,21 +4,11 @@ from Entity import Entity
 
 
 class Enemy(Entity):
-    """
-    Базовый класс для всех агрессивных врагов (зомби, бандиты и т.д.)
-    Содержит общую логику: агро, эффекты (лёд/страх), движение к игроку,
-    разделение с другими врагами, ближний бой, отрисовку.
-
-    Подклассы обязаны задать:
-        image_path, frozen_image_path, fear_image_path
-    и вызвать super().__init__(screen, hp, speed, attack).
-    """
-
     image_path = None
     frozen_image_path = None
     fear_image_path = None
 
-    vision_radius = 400
+    vision_radius = 700
     lose_radius = 1000
 
     def __init__(self, screen: pygame.Surface, hp: int, speed: float, attack: int):
@@ -62,10 +52,8 @@ class Enemy(Entity):
                 self.is_afraid = False
                 self.image = pygame.image.load(self.image_path)
 
-    #  Агро / основное обновление
 
     def _update_aggro(self, player: "Entity") -> float:
-        """Обновляет self.aggressive и возвращает текущую дистанцию до игрока."""
         dist = self.distance_to(player)
 
         if dist <= self.vision_radius:
@@ -86,13 +74,10 @@ class Enemy(Entity):
         self._update_aggro(player)
 
         if self.aggressive:
-            # is_afraid передаём в move_toward — там -1 инвертирует направление
             self.move_toward(player.x, player.y, self.is_afraid)
             self._push_away_from(player.rect)
 
         self._separate_from_others(all_enemies)
-
-    #  Физика разделения
 
     def _push_away_from(self, player_rect: pygame.Rect):
         if not self.rect.colliderect(player_rect):
@@ -116,13 +101,11 @@ class Enemy(Entity):
     def is_touching(self, player_rect: pygame.Rect) -> bool:
         return self.rect.inflate(8, 8).colliderect(player_rect)
 
-    #  Отрисовка
-
     def draw(self, camera_x: int, camera_y: int):
         if not self.is_alive:
             return
         super().draw(camera_x, camera_y)
-        self.draw_hitbox(camera_x, camera_y)
+       # self.draw_hitbox(camera_x, camera_y)
         self.draw_health_bar(camera_x, camera_y)
 
 
@@ -132,8 +115,6 @@ class Zombie(Enemy):
     frozen_image_path = "images/frozen_zombie.png"
     fear_image_path = "images/fearZombie.png"
 
-    vision_radius = 400
-    lose_radius = 1000
 
     def __init__(self, screen: pygame.Surface):
         super().__init__(screen, hp=50, speed=1.5, attack=5)
@@ -143,12 +124,7 @@ class Bandit(Enemy):
     image_path = "images/Bandit.png"
     frozen_image_path = "images/FrozenBandit.png"
     fear_image_path = "images/FearBandit.png"
-
-    vision_radius = 450
-    lose_radius = 1000
-
     MELEE_SWITCH_RANGE = 90.0
-
     def __init__(self, screen: pygame.Surface):
         super().__init__(screen, hp=25, speed=2.2, attack=3)
         from Gun import BanditGun
@@ -158,10 +134,6 @@ class Bandit(Enemy):
         self.weapon.update_cooldown(dt)
 
     def try_shoot(self, player: "Entity") -> list:
-        """
-        Возвращает список снарядов, если бандит агрессивен, не заморожен
-        и находится дальше MELEE_SWITCH_RANGE от игрока (иначе — ближний бой).
-        """
         if not self.is_alive or self.is_frozen or not self.aggressive:
             return []
 
